@@ -4,7 +4,7 @@ import ImageList from './ImageList';
 import unsplash from '../api/unsplash';
 
 class App extends React.Component {
-  state = { images: [], term: '', page: null };
+  state = { images: [], term: '', page: null, err: null };
 
   getNextPage = (res) => {
     return res.headers.link
@@ -24,9 +24,14 @@ class App extends React.Component {
       },
     });
 
-    this.setState({ term });
-    this.setState({ page: this.getNextPage(response) });
-    this.setState({ images: response.data.results });
+    if (response.data.total === 0) {
+      this.setState({ err: 'No result please try again :(' });
+    } else {
+      this.setState({ err: null });
+      this.setState({ term });
+      this.setState({ page: this.getNextPage(response) });
+      this.setState({ images: response.data.results });
+    }
   };
 
   getMoreImages = async () => {
@@ -45,6 +50,21 @@ class App extends React.Component {
     this.onSearchSubmit('cars');
   }
 
+  renderContent() {
+    if (this.state.err) {
+      return <h2>{this.state.err}</h2>;
+    } else {
+      return (
+        <>
+          <ImageList images={this.state.images} />
+          <button className="loadBtn" onClick={this.getMoreImages}>
+            more
+          </button>
+        </>
+      );
+    }
+  }
+
   render() {
     return (
       <div
@@ -52,10 +72,7 @@ class App extends React.Component {
         style={{ marginTop: '30px', paddingBottom: '10px' }}
       >
         <SearchBar onSearchSubmit={this.onSearchSubmit} />
-        <ImageList images={this.state.images} />
-        <button className="loadBtn" onClick={this.getMoreImages}>
-          more
-        </button>
+        {this.renderContent()}
       </div>
     );
   }

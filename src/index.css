@@ -45,4 +45,5 @@ body {
   width: 10%;
   margin: 20px auto;
   padding: 5px;
+  cursor: pointer;
 }
